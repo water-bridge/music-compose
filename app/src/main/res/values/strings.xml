@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Music Compose</string>
+    <string name="recommended_title">Recommendation</string>
+    <string name="album_title">Album</string>
+    <string name="notification_channel_name">Music Channel</string>
+    <string name="notification_channel_description">the music channel</string>
+</resources>
