@@ -2,7 +2,7 @@ package com.example.musiccompose.data.network
 
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.MediaMetadataCompat.*
-import com.example.musiccompose.models.Song
+import com.example.musiccompose.models.SongDto
 import com.example.musiccompose.util.contansts.SONG_COLLECTION
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -36,7 +36,7 @@ class FirebaseSource : AbstractMusicSource() {
 
     suspend fun update(): List<MediaMetadataCompat>? = withContext(Dispatchers.IO){
         try {
-            val songCompat = songCollection.get().await().toObjects(Song::class.java).map { song ->
+            val songCompat = songCollection.get().await().toObjects(SongDto::class.java).map { song ->
                 MediaMetadataCompat.Builder()
                     .putString(METADATA_KEY_ARTIST, song.artist)
                     .putString(METADATA_KEY_MEDIA_ID, song.mediaId)

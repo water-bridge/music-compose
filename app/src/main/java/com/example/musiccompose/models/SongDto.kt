@@ -1,9 +1,11 @@
 package com.example.musiccompose.models
 
-data class Song(
+data class SongDto(
     val mediaId: String = "",
     val title: String = "",
-    val subtitle: String = "",
+    val artist: String = "",
+    val genre: String = "",
+    val album: String = "",
     val songUrl: String = "",
     val imageUrl: String = ""
 )

@@ -10,11 +10,13 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.media.MediaBrowserServiceCompat
 import com.example.musiccompose.data.network.MusicSource
 import com.example.musiccompose.extensions.artist
+import com.example.musiccompose.extensions.toMediaItem
 import com.example.musiccompose.extensions.toMediaSource
 import com.example.musiccompose.media.callbacks.MusicPlaybackPreparer
 import com.example.musiccompose.media.callbacks.MusicPlayerEventListener
 import com.example.musiccompose.media.callbacks.MusicPlayerNotificationListener
 import com.example.musiccompose.util.contansts.MEDIA_BROWSABLE_ROOT
+import com.example.musiccompose.util.contansts.NETWORK_FAILURE
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -172,6 +174,23 @@ class MusicService : MediaBrowserServiceCompat(){
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        TODO("Not yet implemented")
+        when (parentId) {
+            MEDIA_BROWSABLE_ROOT -> {
+                val resultSent = firebaseMusicSource.whenReady { successfullyInitialized ->
+                    if (successfullyInitialized) {
+                        val children = firebaseMusicSource.toList().toMediaItem() // Todo
+                        result.sendResult(children.toMutableList())
+                    } else {
+                        mediaSession.sendSessionEvent(NETWORK_FAILURE, null)
+                        result.sendResult(null)
+                    }
+                }
+
+                if (!resultSent) {
+                    result.detach()
+                }
+            }
+            else -> Unit
+        }
     }
 }

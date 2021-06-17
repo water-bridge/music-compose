@@ -2,6 +2,7 @@ package com.example.musiccompose.di
 
 import android.content.Context
 import com.example.musiccompose.data.network.FirebaseSource
+import com.example.musiccompose.data.network.MusicSource
 import com.google.android.exoplayer2.C.CONTENT_TYPE_MUSIC
 import com.google.android.exoplayer2.C.USAGE_MEDIA
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -21,7 +22,7 @@ object ServiceModule {
 
     @ServiceScoped
     @Provides
-    fun provideMusicSource() = FirebaseSource()
+    fun provideMusicSource() : MusicSource = FirebaseSource()
 
     @ServiceScoped
     @Provides
