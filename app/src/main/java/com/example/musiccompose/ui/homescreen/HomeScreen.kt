@@ -1,9 +1,7 @@
 package com.example.musiccompose.ui.homescreen
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musiccompose.models.Song
+import com.google.accompanist.coil.rememberCoilPainter
 
 @ExperimentalMaterialApi
 @Composable
@@ -53,6 +52,7 @@ fun SongList(
                 item,
                 onClickPlaySong
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -66,11 +66,21 @@ fun SongCard(
     Card(
         onClick = { onClickPlaySong(song) },
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(100.dp),
         elevation = 8.dp,
         //backgroundColor = MaterialTheme.colors.background.copy(0.7f),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Text(text = "song")
+        Row {
+            Image(
+                painter = rememberCoilPainter(
+                    request = song.imageUrl,
+                    fadeIn = true,
+                ),
+                null
+            )
+            Text(text = song.title)
+        }
     }
 }
