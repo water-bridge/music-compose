@@ -3,6 +3,9 @@ package com.example.musiccompose.data.network
 import android.support.v4.media.MediaMetadataCompat
 import com.example.musiccompose.data.network.State.*
 
+// code from UAMP
+// I have made some modifications
+
 interface MusicSource : Iterable<MediaMetadataCompat> {
 
     suspend fun load()

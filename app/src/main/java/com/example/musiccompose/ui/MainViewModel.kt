@@ -1,20 +1,20 @@
 package com.example.musiccompose.ui
 
-import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.example.musiccompose.MusicServiceConnection
+import com.example.musiccompose.SubscriptionCallback
 import com.example.musiccompose.extensions.id
 import com.example.musiccompose.extensions.isPlayEnabled
 import com.example.musiccompose.extensions.isPlaying
 import com.example.musiccompose.extensions.isPrepared
-import com.example.musiccompose.models.Song
-import com.example.musiccompose.util.contansts.MEDIA_BROWSABLE_ROOT
+import com.example.musiccompose.models.MediaItemData
+import com.example.musiccompose.util.contansts.MEDIA_ALBUMS_ROOT
+import com.example.musiccompose.util.contansts.MEDIA_ARTISTS_ROOT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -32,38 +32,36 @@ class MainViewModel @Inject constructor(
         }
 
 
-    private val _mediaItems = MutableLiveData<List<Song>>()
-    val mediaItems: LiveData<List<Song>> = _mediaItems
+    private val _albumMediaItems = MutableLiveData<List<MediaItemData>>()
+    val albumMediaItems: LiveData<List<MediaItemData>> = _albumMediaItems
 
-    val isConnected = musicServiceConnection.isConnected
-    val networkFailure = musicServiceConnection.networkFailure
+    private val _artistMediaItems = MutableLiveData<List<MediaItemData>>()
+    val artistMediaItems: LiveData<List<MediaItemData>> = _artistMediaItems
+
+    private val _isPlaying = MutableLiveData<Boolean>()
+    val isPlaying: LiveData<Boolean> = _isPlaying
+
+    val isConnected = musicServiceConnection.isConnected // Todo
+    val networkFailure = musicServiceConnection.networkFailure // Todo
     val nowPlaying = musicServiceConnection.nowPlaying
     val playbackState = musicServiceConnection.playbackState
 
-    private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
-        override fun onChildrenLoaded(
-            parentId: String,
-            children: MutableList<MediaBrowserCompat.MediaItem>
-        ) {
-            super.onChildrenLoaded(parentId, children)
-            val items = children.map {
-                Song(
-                    it.mediaId!!,
-                    it.description.title.toString(),
-                    it.description.subtitle.toString(),
-                    it.description.mediaUri.toString(),
-                    it.description.iconUri.toString()
-                )
-            }
-            _mediaItems.postValue(items)
-        }
+    private val albumsSubscriptionCallback = SubscriptionCallback { items ->
+        _albumMediaItems.postValue(items)
     }
+
+    private val artistsSubscriptionCallback = SubscriptionCallback { items ->
+        _artistMediaItems.postValue(items)
+    }
+
 
     init {
-        musicServiceConnection.subscribe(MEDIA_BROWSABLE_ROOT, subscriptionCallback)
+        // Todo the recommendation part is still not implemented yet
+        musicServiceConnection.subscribe(MEDIA_ALBUMS_ROOT, albumsSubscriptionCallback)
+        musicServiceConnection.subscribe(MEDIA_ARTISTS_ROOT, artistsSubscriptionCallback)
     }
 
-    fun playOrPause(mediaItem: Song, pauseAllowed: Boolean = false) {
+    fun playOrPause(mediaItem: MediaItemData, pauseAllowed: Boolean) {
 
         val isPrepared = playbackState.value?.isPrepared ?: false
         if (isPrepared && mediaItem.mediaId == nowPlaying.value?.id) {
@@ -92,8 +90,13 @@ class MainViewModel @Inject constructor(
         musicServiceConnection.transportationControls.seekTo(position)
     }
 
+    fun onChangeIsPlaying(value: Boolean) {
+        _isPlaying.value = value
+    }
+
     override fun onCleared() {
         super.onCleared()
-        musicServiceConnection.unsubscribe(MEDIA_BROWSABLE_ROOT, subscriptionCallback)
+        musicServiceConnection.unsubscribe(MEDIA_ALBUMS_ROOT, albumsSubscriptionCallback)
+        musicServiceConnection.unsubscribe(MEDIA_ARTISTS_ROOT, artistsSubscriptionCallback)
     }
 }

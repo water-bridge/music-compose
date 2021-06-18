@@ -4,12 +4,15 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.media.MediaBrowserServiceCompat
+import com.example.musiccompose.data.network.BrowseTree
 import com.example.musiccompose.data.network.MusicSource
 import com.example.musiccompose.extensions.artist
+import com.example.musiccompose.extensions.flag
 import com.example.musiccompose.extensions.toMediaItem
 import com.example.musiccompose.extensions.toMediaSource
 import com.example.musiccompose.media.callbacks.MusicPlaybackPreparer
@@ -57,6 +60,10 @@ class MusicService : MediaBrowserServiceCompat(){
 
     private lateinit var musicPlayerEventListener: MusicPlayerEventListener
 
+    private val browseTree: BrowseTree by lazy {
+        BrowseTree(applicationContext, firebaseMusicSource)
+    }
+
     companion object {
         var curSongDuration = 0L
             private set
@@ -93,7 +100,7 @@ class MusicService : MediaBrowserServiceCompat(){
         exoPlayer.addListener(musicPlayerEventListener)
 
         curSongDuration = exoPlayer.duration
-
+        // Todo
         val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource) { itemToPlay ->
             preparePlaylist(
                 metadataList = buildPlaylist(itemToPlay),
@@ -155,6 +162,11 @@ class MusicService : MediaBrowserServiceCompat(){
 
     override fun onDestroy() {
         super.onDestroy()
+        mediaSession.run {
+            isActive = false
+            release()
+        }
+
         serviceScope.cancel()
 
         exoPlayer.removeListener(musicPlayerEventListener)
@@ -166,31 +178,29 @@ class MusicService : MediaBrowserServiceCompat(){
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-        // Todo
+        // for simplicity
         return BrowserRoot(MEDIA_BROWSABLE_ROOT, null)
     }
 
     override fun onLoadChildren(
         parentId: String,
-        result: Result<MutableList<MediaBrowserCompat.MediaItem>>
+        result: Result<MutableList<MediaItem>>
     ) {
-        when (parentId) {
-            MEDIA_BROWSABLE_ROOT -> {
-                val resultSent = firebaseMusicSource.whenReady { successfullyInitialized ->
-                    if (successfullyInitialized) {
-                        val children = firebaseMusicSource.toList().toMediaItem() // Todo
-                        result.sendResult(children.toMutableList())
-                    } else {
-                        mediaSession.sendSessionEvent(NETWORK_FAILURE, null)
-                        result.sendResult(null)
-                    }
+        val resultSent = firebaseMusicSource.whenReady { successfullyInitialized ->
+            if (successfullyInitialized) {
+                //val children = firebaseMusicSource.toList().toMediaItem()
+                val children = browseTree[parentId]?.map { item ->
+                    MediaItem(item.description, item.flag)
                 }
-
-                if (!resultSent) {
-                    result.detach()
-                }
+                result.sendResult(children?.toMutableList())
+            } else {
+                mediaSession.sendSessionEvent(NETWORK_FAILURE, null)
+                result.sendResult(null)
             }
-            else -> Unit
+        }
+
+        if (!resultSent) {
+            result.detach()
         }
     }
 }
