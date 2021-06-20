@@ -1,19 +1,20 @@
 package com.example.musiccompose.ui
 
+import android.support.v4.media.MediaMetadataCompat
+import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.example.musiccompose.MusicServiceConnection
+import com.example.musiccompose.NOTHING_PLAYING
 import com.example.musiccompose.SubscriptionCallback
-import com.example.musiccompose.extensions.id
-import com.example.musiccompose.extensions.isPlayEnabled
-import com.example.musiccompose.extensions.isPlaying
-import com.example.musiccompose.extensions.isPrepared
+import com.example.musiccompose.extensions.*
 import com.example.musiccompose.models.MediaItemData
 import com.example.musiccompose.util.contansts.MEDIA_ALBUMS_ROOT
 import com.example.musiccompose.util.contansts.MEDIA_ARTISTS_ROOT
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,6 +41,28 @@ class MainViewModel @Inject constructor(
 
     private val _isPlaying = MutableLiveData<Boolean>()
     val isPlaying: LiveData<Boolean> = _isPlaying
+
+    private var fromAlbum = true
+
+    val curPlayingSong: LiveData<MediaItemData> =
+        Transformations.map(musicServiceConnection.nowPlaying) { nowPlaying ->
+            val g = MediaItemData(
+                nowPlaying?.description?.mediaId ?: "",
+                nowPlaying?.description?.title.toString(),
+                nowPlaying?.description?.subtitle.toString(),
+                nowPlaying?.description?.mediaUri.toString(),
+                nowPlaying?.description?.iconUri.toString(),
+                false
+            )
+            Timber.d("current playing song ${nowPlaying?.id}")
+            Timber.d("current playing song art ${nowPlaying?.description?.iconUri}")
+            Timber.d("current playing song g ${g.mediaId}")
+            Timber.d("current playing song g ${g.title}")
+            Timber.d("current playing song g ${g.subtitle}")
+            Timber.d("current playing song g ${g.songUrl}")
+            Timber.d("current playing song g ${g.imageUrl}")
+            g
+        } // Todo
 
     val isConnected = musicServiceConnection.isConnected // Todo
     val networkFailure = musicServiceConnection.networkFailure // Todo
@@ -74,15 +97,19 @@ class MainViewModel @Inject constructor(
                 }
             }
         } else {
-            musicServiceConnection.transportationControls.playFromMediaId(mediaItem.mediaId, null)
+            musicServiceConnection.transportationControls
+                .playFromMediaId(
+                    mediaItem.mediaId,
+                    bundleOf("FROM_ALBUM" to fromAlbum)
+                )
         }
     }
 
-    fun skipToNextSong() {
+    fun nextSong() {
         musicServiceConnection.transportationControls.skipToNext()
     }
 
-    fun skipToPreviousSong() {
+    fun previousSong() {
         musicServiceConnection.transportationControls.skipToPrevious()
     }
 
@@ -92,6 +119,10 @@ class MainViewModel @Inject constructor(
 
     fun onChangeIsPlaying(value: Boolean) {
         _isPlaying.value = value
+    }
+
+    fun onChangeFromAlbum(value: Boolean) {
+        fromAlbum = value
     }
 
     override fun onCleared() {

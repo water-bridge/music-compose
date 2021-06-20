@@ -1,30 +1,26 @@
 package com.example.musiccompose.ui
 
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
 import com.example.musiccompose.models.MediaItemData
-import com.example.musiccompose.ui.base.BottomNavSongBar
 import com.example.musiccompose.ui.homescreen.HomeScreen
 import com.example.musiccompose.ui.listscreen.ListScreen
 import com.example.musiccompose.ui.listscreen.ListViewModel
+import com.example.musiccompose.ui.songdetail.SongDetailScreen
+import com.example.musiccompose.ui.songdetail.SongDetailViewModel
 import com.example.musiccompose.ui.theme.MusicComposeTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import timber.log.Timber
 
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
@@ -46,13 +42,13 @@ fun MusicComposeApp() {
         Scaffold(
             scaffoldState = scaffoldState,
             bottomBar = {
-                BottomNavSongBar(
+                /*BottomNavSongBar(
                     mainViewModel::playOrPause,
                     mainViewModel::onChangeIsPlaying,
                     barList,
                     isPlaying,
                     pagerState
-                )
+                )*/
             }
         ) {
             NavHost(
@@ -69,18 +65,18 @@ fun MusicComposeApp() {
                 composable(
                     MainDestinations.SongList.routeWithArgument,
                     arguments = listOf(
-                        navArgument(MainDestinations.SongList.albumId) {
+                        navArgument(MainDestinations.SongList.mediaId) {
                             type = NavType.StringType
                         }
                     )
                 ) { backStackEntry ->
                     // scoped to the songList screen
                     val listViewModel = hiltViewModel<ListViewModel>()
-                    val albumId = backStackEntry.arguments?.getString(
-                        MainDestinations.SongList.albumId
+                    val mediaId = backStackEntry.arguments?.getString(
+                        MainDestinations.SongList.mediaId
                     ) ?: return@composable
                     // must observe here, otherwise the mutablestate wont update, bug?
-                    listViewModel.subscribe(albumId)
+                    listViewModel.subscribe(mediaId)
                     val songList by listViewModel.songList.observeAsState()
                     barList = songList ?: emptyList()
                     pagerState.pageCount = barList.size
@@ -88,6 +84,26 @@ fun MusicComposeApp() {
                     ListScreen(
                         mainViewModel = mainViewModel,
                         listViewModel = listViewModel
+                    ) {
+                        navController.navigate("${MainDestinations.SongDetail.route}/$it")
+                    }
+                }
+
+                composable(
+                    MainDestinations.SongDetail.routeWithArgument,
+                    arguments = listOf(
+                        navArgument(MainDestinations.SongDetail.songId) {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { backStackEntry ->
+                    val songDetailViewModel = hiltViewModel<SongDetailViewModel>()
+                    val songId = backStackEntry.arguments?.getString(
+                        MainDestinations.SongDetail.songId
+                    )
+                    SongDetailScreen(
+                        mainViewModel = mainViewModel,
+                        songDetailViewModel = songDetailViewModel
                     )
                 }
             }
@@ -100,8 +116,8 @@ fun MusicComposeApp() {
 sealed class MainDestinations(val route: String) {
     object Home : MainDestinations("home")
     object SongList : MainDestinations("songList") {
-        const val routeWithArgument: String = "songList/{albumId}"
-        const val albumId: String = "albumId"
+        const val routeWithArgument: String = "songList/{mediaId}"
+        const val mediaId: String = "mediaId"
     }
     object SongDetail : MainDestinations("songDetail") {
         const val routeWithArgument: String = "songDetail/{songId}"

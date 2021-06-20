@@ -110,8 +110,7 @@ class BrowseTree(
             id = mediaItem.album.urlEncoded
             title = mediaItem.album
             artist = mediaItem.artist
-            //albumArt = mediaItem.albumArt
-            albumArtUri = mediaItem.albumArtUri.toString()
+            albumArtUri = FAKE_ALBUM_ART_URL
             flag = FLAG_BROWSABLE
         }.build()
 
@@ -131,8 +130,7 @@ class BrowseTree(
             id = mediaItem.artist ?: ""
             title = mediaItem.artist // for simplicity
             artist = mediaItem.artist
-            albumArt = mediaItem.albumArt
-            albumArtUri = mediaItem.albumArtUri.toString()
+            albumArtUri = FAKE_ALBUM_ART_URL
             flag = FLAG_BROWSABLE
         }.build()
 

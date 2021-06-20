@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem
+import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -100,10 +101,10 @@ class MusicService : MediaBrowserServiceCompat(){
         exoPlayer.addListener(musicPlayerEventListener)
 
         curSongDuration = exoPlayer.duration
-        // Todo
-        val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource) { itemToPlay ->
+
+        val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource) { preparedList, itemToPlay ->
             preparePlaylist(
-                metadataList = buildPlaylist(itemToPlay),
+                metadataList = preparedList,
                 itemToPlay = itemToPlay,
                 playWhenReady = true
             )
@@ -142,18 +143,6 @@ class MusicService : MediaBrowserServiceCompat(){
         exoPlayer.seekTo(initialWindowIndex, 0L)
     }
 
-    /**
-     * Builds a playlist based on a [MediaMetadataCompat].
-     *
-     * TODO: Support building a playlist by artist, genre, etc...
-     *
-     * @param item Item to base the playlist on.
-     * @return a [List] of [MediaMetadataCompat] objects representing a playlist.
-     */
-    private fun buildPlaylist(item: MediaMetadataCompat): List<MediaMetadataCompat> =
-        firebaseMusicSource.filter { it.artist == item.artist }
-
-
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         // exoPlayer is still not release yet.!! we need to call release() when the service is destroyed
@@ -189,6 +178,9 @@ class MusicService : MediaBrowserServiceCompat(){
         val resultSent = firebaseMusicSource.whenReady { successfullyInitialized ->
             if (successfullyInitialized) {
                 //val children = firebaseMusicSource.toList().toMediaItem()
+                /*val children = browseTree[parentId]?.map { item ->
+                    MediaItem(item.description, item.flag)
+                }*/
                 val children = browseTree[parentId]?.map { item ->
                     MediaItem(item.description, item.flag)
                 }

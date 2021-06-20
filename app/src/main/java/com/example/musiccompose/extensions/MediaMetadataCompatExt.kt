@@ -276,6 +276,6 @@ inline var MediaMetadataCompat.Builder.flag: Int
  * Custom property that holds whether an item is [MediaItem.FLAG_BROWSABLE] or
  * [MediaItem.FLAG_PLAYABLE].
  */
-const val METADATA_KEY_MEDIA_FLAGS = "com.example.android.uamp.media.METADATA_KEY_UAMP_FLAGS"
+const val METADATA_KEY_MEDIA_FLAGS = "METADATA_KEY_MEDIA_FLAGS"
 
 

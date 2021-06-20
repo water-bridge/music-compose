@@ -1,14 +1,14 @@
 package com.example.musiccompose.ui.homescreen
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +21,7 @@ import com.example.musiccompose.ui.MainViewModel
 import com.example.musiccompose.ui.listscreen.SongList
 import com.google.accompanist.coil.rememberCoilPainter
 
+@ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
 fun HomeScreen(
@@ -29,6 +30,7 @@ fun HomeScreen(
 ) {
     val albumMediaItems by mainViewModel.albumMediaItems.observeAsState()
     val artistMediaItems by mainViewModel.artistMediaItems.observeAsState()
+    val scrollState = rememberScrollState()
 
     Column {
         albumMediaItems?.let {
@@ -36,21 +38,20 @@ fun HomeScreen(
                 items(it) { item ->
                     CollectionCell(
                         item = item,
-                        onClick = navigateToSongList
+                        onChangeFromAlbum = mainViewModel::onChangeFromAlbum,
+                        navigateToSongList = navigateToSongList
                     )
                 }
             }
         }
 
         artistMediaItems?.let {
-            LazyVerticalGrid(cells = GridCells.Fixed(2)) {
-                items(it) { item ->
-                    CollectionCell(
-                        item = item,
-                        onClick = navigateToSongList
-                    )
-                }
-            }
+            ScrollableArtistRow(
+                artistMediaItems = it,
+                scrollState = scrollState,
+                onChangeFromAlbum = mainViewModel::onChangeFromAlbum,
+                navigateToSongList = navigateToSongList
+            )
         }
     }
 }
@@ -58,12 +59,16 @@ fun HomeScreen(
 @Composable
 fun CollectionCell(
     item: MediaItemData,
-    onClick: (String) -> Unit
+    onChangeFromAlbum: (Boolean) -> Unit,
+    navigateToSongList: (String) -> Unit
 ) {
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .clickable { onClick(item.mediaId) }
+            .clickable {
+                onChangeFromAlbum(true)
+                navigateToSongList(item.mediaId)
+            }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
@@ -72,6 +77,62 @@ fun CollectionCell(
                     fadeIn = true,
                 ),
                 null
+            )
+            Text(text = item.title)
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun ScrollableArtistRow(
+    artistMediaItems: List<MediaItemData>,
+    scrollState: ScrollState,
+    onChangeFromAlbum: (Boolean) -> Unit,
+    navigateToSongList: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState)
+    ) {
+        artistMediaItems.forEach {
+            ArtistCard(
+                it,
+                onChangeFromAlbum,
+                navigateToSongList
+            )
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun ArtistCard(
+    item: MediaItemData,
+    onChangeFromAlbum: (Boolean) -> Unit,
+    navigateToSongList: (String) -> Unit
+) {
+    Card(
+        onClick = {
+            onChangeFromAlbum(false)
+            navigateToSongList(item.mediaId)
+        },
+        modifier = Modifier
+            .width(160.dp)
+            .height(70.dp),
+        elevation = 8.dp,
+        //backgroundColor = MaterialTheme.colors.background.copy(0.7f),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row {
+            Image(
+                painter = rememberCoilPainter(
+                    request = item.imageUrl,
+                    fadeIn = true,
+                ),
+                contentDescription = null,
+                modifier = Modifier.width(70.dp)
             )
             Text(text = item.title)
         }

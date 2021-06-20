@@ -47,8 +47,6 @@ class FirebaseSource : AbstractMusicSource() {
                     .putString(METADATA_KEY_DISPLAY_ICON_URI, song.imageUrl)
                     .putString(METADATA_KEY_MEDIA_URI, song.songUrl)
                     .putString(METADATA_KEY_ALBUM_ART_URI, song.imageUrl)
-                    //.putString(METADATA_KEY_DISPLAY_SUBTITLE, song.subtitle)
-                    //.putString(METADATA_KEY_DISPLAY_DESCRIPTION, song.subtitle)
                     .build()
             }
             songCompat

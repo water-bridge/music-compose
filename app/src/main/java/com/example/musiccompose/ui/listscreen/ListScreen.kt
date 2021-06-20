@@ -25,6 +25,7 @@ import com.google.accompanist.coil.rememberCoilPainter
 fun ListScreen(
     mainViewModel: MainViewModel,
     listViewModel: ListViewModel,
+    navigateToSongDetail: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val songList by listViewModel.songList.observeAsState()
@@ -34,7 +35,8 @@ fun ListScreen(
             SongList(
                 listState,
                 it,
-                mainViewModel::playOrPause
+                mainViewModel::playOrPause,
+                navigateToSongDetail
             )
         }
     }
@@ -45,13 +47,15 @@ fun ListScreen(
 fun SongList(
     listState: LazyListState,
     mediaItemDataList: List<MediaItemData>,
-    onClickPlaySong: (MediaItemData, Boolean) -> Unit
+    playOrPause: (MediaItemData, Boolean) -> Unit,
+    navigateToSongDetail: (String) -> Unit
 ) {
     LazyColumn (state = listState) {
         items(mediaItemDataList) { item ->
             SongCard(
                 item,
-                onClickPlaySong
+                playOrPause,
+                navigateToSongDetail
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -62,10 +66,14 @@ fun SongList(
 @Composable
 fun SongCard(
     mediaItemData: MediaItemData,
-    onClickPlaySong: (MediaItemData, Boolean) -> Unit
+    playOrPause: (MediaItemData, Boolean) -> Unit,
+    navigateToSongDetail: (String) -> Unit
 ) {
     Card(
-        onClick = { onClickPlaySong(mediaItemData, false) },
+        onClick = {
+            playOrPause(mediaItemData, false)
+            navigateToSongDetail(mediaItemData.mediaId)
+        },
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp),
