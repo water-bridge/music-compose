@@ -29,85 +29,70 @@ import com.google.accompanist.pager.rememberPagerState
 fun MusicComposeApp() {
     MusicComposeTheme {
         val navController = rememberNavController()
-        val scaffoldState = rememberScaffoldState()
 
         // scoped to activity
         val mainViewModel = hiltViewModel<MainViewModel>()
-        val isPlaying by mainViewModel.isPlaying.observeAsState(false)
         var barList by remember {
             mutableStateOf(emptyList<MediaItemData>())
         }
         val pagerState = rememberPagerState(pageCount = 0)
 
-        Scaffold(
-            scaffoldState = scaffoldState,
-            bottomBar = {
-                /*BottomNavSongBar(
-                    mainViewModel::playOrPause,
-                    mainViewModel::onChangeIsPlaying,
-                    barList,
-                    isPlaying,
-                    pagerState
-                )*/
-            }
+        NavHost(
+            navController = navController,
+            startDestination = MainDestinations.Home.route
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = MainDestinations.Home.route
-            ) {
-                composable(MainDestinations.Home.route) {
-                    HomeScreen(
-                        mainViewModel = mainViewModel,
-                    ) {
-                        navController.navigate("${MainDestinations.SongList.route}/$it")
-                    }
+            composable(MainDestinations.Home.route) {
+                HomeScreen(
+                    mainViewModel = mainViewModel,
+                ) {
+                    navController.navigate("${MainDestinations.SongList.route}/$it")
                 }
-                composable(
-                    MainDestinations.SongList.routeWithArgument,
-                    arguments = listOf(
-                        navArgument(MainDestinations.SongList.mediaId) {
-                            type = NavType.StringType
-                        }
-                    )
-                ) { backStackEntry ->
-                    // scoped to the songList screen
-                    val listViewModel = hiltViewModel<ListViewModel>()
-                    val mediaId = backStackEntry.arguments?.getString(
-                        MainDestinations.SongList.mediaId
-                    ) ?: return@composable
-                    // must observe here, otherwise the mutablestate wont update, bug?
-                    listViewModel.subscribe(mediaId)
-                    val songList by listViewModel.songList.observeAsState()
-                    barList = songList ?: emptyList()
-                    pagerState.pageCount = barList.size
-
-                    ListScreen(
-                        mainViewModel = mainViewModel,
-                        listViewModel = listViewModel
-                    ) {
-                        navController.navigate("${MainDestinations.SongDetail.route}/$it")
+            }
+            composable(
+                MainDestinations.SongList.routeWithArgument,
+                arguments = listOf(
+                    navArgument(MainDestinations.SongList.mediaId) {
+                        type = NavType.StringType
                     }
-                }
+                )
+            ) { backStackEntry ->
+                // scoped to the songList screen
+                val listViewModel = hiltViewModel<ListViewModel>()
+                val mediaId = backStackEntry.arguments?.getString(
+                    MainDestinations.SongList.mediaId
+                ) ?: return@composable
+                // must observe here, otherwise the mutablestate wont update, bug?
+                listViewModel.subscribe(mediaId)
+                //val songList by listViewModel.songList.observeAsState()
+                //barList = songList ?: emptyList()
+                //pagerState.pageCount = barList.size
 
-                composable(
-                    MainDestinations.SongDetail.routeWithArgument,
-                    arguments = listOf(
-                        navArgument(MainDestinations.SongDetail.songId) {
-                            type = NavType.StringType
-                        }
-                    )
-                ) { backStackEntry ->
-                    val songDetailViewModel = hiltViewModel<SongDetailViewModel>()
-                    val songId = backStackEntry.arguments?.getString(
-                        MainDestinations.SongDetail.songId
-                    )
-                    SongDetailScreen(
-                        mainViewModel = mainViewModel,
-                        songDetailViewModel = songDetailViewModel
-                    )
+                ListScreen(
+                    mainViewModel = mainViewModel,
+                    listViewModel = listViewModel,
+                    pagerState = pagerState
+                ) {
+                    navController.navigate("${MainDestinations.SongDetail.route}/$it")
                 }
             }
 
+            composable(
+                MainDestinations.SongDetail.routeWithArgument,
+                arguments = listOf(
+                    navArgument(MainDestinations.SongDetail.songId) {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+                val songDetailViewModel = hiltViewModel<SongDetailViewModel>()
+                val songId = backStackEntry.arguments?.getString(
+                    MainDestinations.SongDetail.songId
+                )
+                SongDetailScreen(
+                    mainViewModel = mainViewModel,
+                    songDetailViewModel = songDetailViewModel
+                )
+            }
         }
     }
 }
@@ -119,6 +104,7 @@ sealed class MainDestinations(val route: String) {
         const val routeWithArgument: String = "songList/{mediaId}"
         const val mediaId: String = "mediaId"
     }
+
     object SongDetail : MainDestinations("songDetail") {
         const val routeWithArgument: String = "songDetail/{songId}"
         const val songId: String = "songId"

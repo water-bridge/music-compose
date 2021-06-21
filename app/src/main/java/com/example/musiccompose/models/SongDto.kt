@@ -7,5 +7,6 @@ data class SongDto(
     val genre: String = "",
     val album: String = "",
     val songUrl: String = "",
-    val imageUrl: String = ""
+    val imageUrl: String = "",
+    val duration: Long = -1
 )

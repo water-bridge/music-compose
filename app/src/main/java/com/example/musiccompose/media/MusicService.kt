@@ -55,10 +55,6 @@ class MusicService : MediaBrowserServiceCompat(){
 
     var isForegroundService = false
 
-    private var curPlayingSong: MediaMetadataCompat? = null
-
-    private val isPlayerInitialized = false
-
     private lateinit var musicPlayerEventListener: MusicPlayerEventListener
 
     private val browseTree: BrowseTree by lazy {
@@ -100,8 +96,6 @@ class MusicService : MediaBrowserServiceCompat(){
         )
         exoPlayer.addListener(musicPlayerEventListener)
 
-        curSongDuration = exoPlayer.duration
-
         val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource) { preparedList, itemToPlay ->
             preparePlaylist(
                 metadataList = preparedList,
@@ -117,7 +111,6 @@ class MusicService : MediaBrowserServiceCompat(){
         }
 
         musicNotificationManager.showNotification(exoPlayer)
-
     }
 
     private inner class MusicQueueNavigator : TimelineQueueNavigator(mediaSession) {

@@ -10,6 +10,7 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.musiccompose.extensions.duration
 import com.example.musiccompose.media.MusicService
 import com.example.musiccompose.util.Event
 import com.example.musiccompose.util.Resource
@@ -20,19 +21,22 @@ class MusicServiceConnection(
 ) {
     val rootMediaId: String get() = mediaBrowser.root
 
+    private val _duration = MutableLiveData<Long>()
+    val duration: LiveData<Long> = _duration
+
     private val _isConnected = MutableLiveData<Boolean>()
     val isConnected: LiveData<Boolean> = _isConnected
 
     private val _networkFailure = MutableLiveData<Boolean>()
     val networkFailure: LiveData<Boolean> = _networkFailure
 
-    private val _playbackState = MutableLiveData<PlaybackStateCompat?>()
+    private val _playbackState = MutableLiveData<PlaybackStateCompat>()
         .apply { postValue(EMPTY_PLAYBACK_STATE) }
-    val playbackState: LiveData<PlaybackStateCompat?> = _playbackState
+    val playbackState: LiveData<PlaybackStateCompat> = _playbackState
 
-    private val _nowPlaying = MutableLiveData<MediaMetadataCompat?>()
+    private val _nowPlaying = MutableLiveData<MediaMetadataCompat>()
         .apply { postValue(NOTHING_PLAYING) }
-    val nowPlaying: LiveData<MediaMetadataCompat?> = _nowPlaying
+    val nowPlaying: LiveData<MediaMetadataCompat> = _nowPlaying
 
     lateinit var mediaController: MediaControllerCompat
 
@@ -87,6 +91,7 @@ class MusicServiceConnection(
                     metadata
                 }
             )
+            _duration.postValue(metadata?.duration ?: -1)
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {

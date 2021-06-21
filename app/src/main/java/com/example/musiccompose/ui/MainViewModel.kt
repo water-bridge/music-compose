@@ -39,9 +39,6 @@ class MainViewModel @Inject constructor(
     private val _artistMediaItems = MutableLiveData<List<MediaItemData>>()
     val artistMediaItems: LiveData<List<MediaItemData>> = _artistMediaItems
 
-    private val _isPlaying = MutableLiveData<Boolean>()
-    val isPlaying: LiveData<Boolean> = _isPlaying
-
     private var fromAlbum = true
 
     val curPlayingSong: LiveData<MediaItemData> =
@@ -52,22 +49,23 @@ class MainViewModel @Inject constructor(
                 nowPlaying?.description?.subtitle.toString(),
                 nowPlaying?.description?.mediaUri.toString(),
                 nowPlaying?.description?.iconUri.toString(),
+                nowPlaying.duration,
                 false
             )
-            Timber.d("current playing song ${nowPlaying?.id}")
-            Timber.d("current playing song art ${nowPlaying?.description?.iconUri}")
             Timber.d("current playing song g ${g.mediaId}")
             Timber.d("current playing song g ${g.title}")
             Timber.d("current playing song g ${g.subtitle}")
             Timber.d("current playing song g ${g.songUrl}")
             Timber.d("current playing song g ${g.imageUrl}")
+            Timber.d("current playing song g ${g.duration}")
             g
         } // Todo
 
     val isConnected = musicServiceConnection.isConnected // Todo
     val networkFailure = musicServiceConnection.networkFailure // Todo
-    val nowPlaying = musicServiceConnection.nowPlaying
+    private val nowPlaying = musicServiceConnection.nowPlaying
     val playbackState = musicServiceConnection.playbackState
+    private val duration = musicServiceConnection.duration
 
     private val albumsSubscriptionCallback = SubscriptionCallback { items ->
         _albumMediaItems.postValue(items)
@@ -91,7 +89,9 @@ class MainViewModel @Inject constructor(
             playbackState.value?.let { playbackState ->
                 when {
                     playbackState.isPlaying ->
-                        if (pauseAllowed) musicServiceConnection.transportationControls.pause() else Unit
+                        if (pauseAllowed) {
+                            musicServiceConnection.transportationControls.pause()
+                        } else Unit
                     playbackState.isPlayEnabled -> musicServiceConnection.transportationControls.play()
                     else -> Unit
                 }
@@ -113,12 +113,9 @@ class MainViewModel @Inject constructor(
         musicServiceConnection.transportationControls.skipToPrevious()
     }
 
-    fun seekTo(position: Long) {
-        musicServiceConnection.transportationControls.seekTo(position)
-    }
-
-    fun onChangeIsPlaying(value: Boolean) {
-        _isPlaying.value = value
+    fun seekTo(value: Float) {
+        val position = value * (duration.value ?: -1).toFloat()
+        musicServiceConnection.transportationControls.seekTo(position.toLong())
     }
 
     fun onChangeFromAlbum(value: Boolean) {

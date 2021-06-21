@@ -34,6 +34,7 @@ class ListViewModel @Inject constructor(
                     it.description.subtitle.toString(),
                     it.description.mediaUri.toString(),
                     it.description.iconUri.toString(),
+                    -99,
                     it.isBrowsable // may be used in future
                 )
             }

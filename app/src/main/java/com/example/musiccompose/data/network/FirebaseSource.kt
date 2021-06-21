@@ -9,6 +9,8 @@ import kotlinx.coroutines.tasks.await
 import com.example.musiccompose.data.network.State.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class FirebaseSource : AbstractMusicSource() {
 
@@ -37,6 +39,8 @@ class FirebaseSource : AbstractMusicSource() {
     suspend fun update(): List<MediaMetadataCompat>? = withContext(Dispatchers.IO){
         try {
             val songCompat = songCollection.get().await().toObjects(SongDto::class.java).map { song ->
+                val duration = TimeUnit.SECONDS.toMillis(song.duration)
+                Timber.d("duration: $duration")
                 MediaMetadataCompat.Builder()
                     .putString(METADATA_KEY_ARTIST, song.artist)
                     .putString(METADATA_KEY_MEDIA_ID, song.mediaId)
@@ -47,7 +51,9 @@ class FirebaseSource : AbstractMusicSource() {
                     .putString(METADATA_KEY_DISPLAY_ICON_URI, song.imageUrl)
                     .putString(METADATA_KEY_MEDIA_URI, song.songUrl)
                     .putString(METADATA_KEY_ALBUM_ART_URI, song.imageUrl)
+                    .putLong(METADATA_KEY_DURATION, duration)
                     .build()
+
             }
             songCompat
         } catch(e: Exception) {
