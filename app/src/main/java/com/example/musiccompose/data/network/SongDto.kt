@@ -1,4 +1,4 @@
-package com.example.musiccompose.models
+package com.example.musiccompose.data.network
 
 data class SongDto(
     val mediaId: String = "",

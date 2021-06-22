@@ -1,7 +1,5 @@
 package com.example.musiccompose.models
 
-import java.time.Duration
-
 data class MediaItemData(
     val mediaId: String = "",
     val title: String = "",

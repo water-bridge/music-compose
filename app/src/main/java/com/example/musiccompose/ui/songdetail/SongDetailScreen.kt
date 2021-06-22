@@ -1,15 +1,9 @@
 package com.example.musiccompose.ui.songdetail
 
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -26,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.musiccompose.EMPTY_PLAYBACK_STATE
 import com.example.musiccompose.extensions.isPlaying
 import com.example.musiccompose.models.MediaItemData
@@ -36,7 +31,7 @@ fun SongDetailScreen(
     mainViewModel: MainViewModel,
     songDetailViewModel: SongDetailViewModel
 ) {
-    val curPlayingSong by mainViewModel.curPlayingSong.observeAsState()
+    val curPlayingSong by mainViewModel.nowPlayingSong.observeAsState()
     val playbackState by mainViewModel.playbackState.observeAsState(EMPTY_PLAYBACK_STATE)
     val progress by songDetailViewModel.curProgress.observeAsState(0f)
 
@@ -83,6 +78,16 @@ fun SongArtView(
                 .fillMaxSize()
                 .alpha(0.7f)
         )
+        Column(
+            modifier = Modifier
+                .padding(top = 40.dp)
+                .align(Alignment.TopCenter)
+        ) {
+            Text(
+                text = curPlayingSong.title,
+                fontSize = 30.sp
+            )
+        }
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

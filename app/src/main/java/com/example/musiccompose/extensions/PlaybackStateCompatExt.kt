@@ -3,6 +3,7 @@ package com.example.musiccompose.extensions
 import android.os.SystemClock
 import android.support.v4.media.session.PlaybackStateCompat
 
+// code form UAMP
 inline val PlaybackStateCompat.isPrepared
     get() = (state == PlaybackStateCompat.STATE_BUFFERING) ||
             (state == PlaybackStateCompat.STATE_PLAYING) ||

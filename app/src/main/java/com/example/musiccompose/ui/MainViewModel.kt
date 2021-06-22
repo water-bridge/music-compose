@@ -1,16 +1,15 @@
 package com.example.musiccompose.ui
 
-import android.support.v4.media.MediaMetadataCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.example.musiccompose.MusicServiceConnection
-import com.example.musiccompose.NOTHING_PLAYING
 import com.example.musiccompose.SubscriptionCallback
 import com.example.musiccompose.extensions.*
 import com.example.musiccompose.models.MediaItemData
+import com.example.musiccompose.util.Resource
 import com.example.musiccompose.util.contansts.MEDIA_ALBUMS_ROOT
 import com.example.musiccompose.util.contansts.MEDIA_ARTISTS_ROOT
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,28 +21,15 @@ class MainViewModel @Inject constructor(
     private val musicServiceConnection: MusicServiceConnection
 ) : ViewModel() {
 
+    private val _albumMediaItems = MutableLiveData<Resource<List<MediaItemData>>>()
+    val albumMediaItems: LiveData<Resource<List<MediaItemData>>> = _albumMediaItems
 
-    val rootMedia: LiveData<String> =
-        Transformations.map(musicServiceConnection.isConnected) { isConnected ->
-            if (isConnected) {
-                musicServiceConnection.rootMediaId
-            } else {
-                null
-            }
-        }
+    private val _artistMediaItems = MutableLiveData<Resource<List<MediaItemData>>>()
+    val artistMediaItems: LiveData<Resource<List<MediaItemData>>> = _artistMediaItems
 
-
-    private val _albumMediaItems = MutableLiveData<List<MediaItemData>>()
-    val albumMediaItems: LiveData<List<MediaItemData>> = _albumMediaItems
-
-    private val _artistMediaItems = MutableLiveData<List<MediaItemData>>()
-    val artistMediaItems: LiveData<List<MediaItemData>> = _artistMediaItems
-
-    private var fromAlbum = true
-
-    val curPlayingSong: LiveData<MediaItemData> =
+    val nowPlayingSong: LiveData<MediaItemData> =
         Transformations.map(musicServiceConnection.nowPlaying) { nowPlaying ->
-            val g = MediaItemData(
+            MediaItemData(
                 nowPlaying?.description?.mediaId ?: "",
                 nowPlaying?.description?.title.toString(),
                 nowPlaying?.description?.subtitle.toString(),
@@ -52,14 +38,9 @@ class MainViewModel @Inject constructor(
                 nowPlaying.duration,
                 false
             )
-            Timber.d("current playing song g ${g.mediaId}")
-            Timber.d("current playing song g ${g.title}")
-            Timber.d("current playing song g ${g.subtitle}")
-            Timber.d("current playing song g ${g.songUrl}")
-            Timber.d("current playing song g ${g.imageUrl}")
-            Timber.d("current playing song g ${g.duration}")
-            g
-        } // Todo
+        }
+
+    private var fromAlbum = true
 
     val isConnected = musicServiceConnection.isConnected // Todo
     val networkFailure = musicServiceConnection.networkFailure // Todo
@@ -67,17 +48,22 @@ class MainViewModel @Inject constructor(
     val playbackState = musicServiceConnection.playbackState
     private val duration = musicServiceConnection.duration
 
+    private val transportationControls by lazy {
+        musicServiceConnection.transportationControls
+    }
+
     private val albumsSubscriptionCallback = SubscriptionCallback { items ->
-        _albumMediaItems.postValue(items)
+        _albumMediaItems.postValue(Resource.success(items))
     }
 
     private val artistsSubscriptionCallback = SubscriptionCallback { items ->
-        _artistMediaItems.postValue(items)
+        _artistMediaItems.postValue(Resource.success(items))
     }
-
 
     init {
         // Todo the recommendation part is still not implemented yet
+        _albumMediaItems.postValue(Resource.loading(null))
+        _artistMediaItems.postValue((Resource.loading(null)))
         musicServiceConnection.subscribe(MEDIA_ALBUMS_ROOT, albumsSubscriptionCallback)
         musicServiceConnection.subscribe(MEDIA_ARTISTS_ROOT, artistsSubscriptionCallback)
     }
@@ -90,15 +76,14 @@ class MainViewModel @Inject constructor(
                 when {
                     playbackState.isPlaying ->
                         if (pauseAllowed) {
-                            musicServiceConnection.transportationControls.pause()
+                            transportationControls.pause()
                         } else Unit
-                    playbackState.isPlayEnabled -> musicServiceConnection.transportationControls.play()
+                    playbackState.isPlayEnabled -> transportationControls.play()
                     else -> Unit
                 }
             }
         } else {
-            musicServiceConnection.transportationControls
-                .playFromMediaId(
+            transportationControls.playFromMediaId(
                     mediaItem.mediaId,
                     bundleOf("FROM_ALBUM" to fromAlbum)
                 )
@@ -106,16 +91,16 @@ class MainViewModel @Inject constructor(
     }
 
     fun nextSong() {
-        musicServiceConnection.transportationControls.skipToNext()
+        transportationControls.skipToNext()
     }
 
     fun previousSong() {
-        musicServiceConnection.transportationControls.skipToPrevious()
+        transportationControls.skipToPrevious()
     }
 
     fun seekTo(value: Float) {
         val position = value * (duration.value ?: -1).toFloat()
-        musicServiceConnection.transportationControls.seekTo(position.toLong())
+        transportationControls.seekTo(position.toLong())
     }
 
     fun onChangeFromAlbum(value: Boolean) {

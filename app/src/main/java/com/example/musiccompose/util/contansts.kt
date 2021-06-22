@@ -16,5 +16,5 @@ object contansts {
 
     const val NETWORK_FAILURE = "NETWORK_FAILURE"
 
-    const val UPDATE_PLAYER_POSTION_INTERVAL = 100L
+    const val PAUSE_INTERVAL = 100L
 }

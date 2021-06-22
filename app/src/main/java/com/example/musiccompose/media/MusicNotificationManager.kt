@@ -25,7 +25,6 @@ class MusicNotificationManager(
 
     init {
         val mediaController = MediaControllerCompat(context, sessionToken)
-        // Todo update the deprecated
         notificationManager = PlayerNotificationManager.createWithNotificationChannel(
             context,
             NOTIFICATION_CHANNEL_ID,

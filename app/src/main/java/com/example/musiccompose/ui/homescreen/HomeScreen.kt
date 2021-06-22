@@ -1,24 +1,28 @@
 package com.example.musiccompose.ui.homescreen
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.musiccompose.R
 import com.example.musiccompose.models.MediaItemData
 import com.example.musiccompose.ui.MainViewModel
-import com.example.musiccompose.ui.listscreen.SongList
+import com.example.musiccompose.util.Status.*
 import com.google.accompanist.coil.rememberCoilPainter
 
 @ExperimentalMaterialApi
@@ -33,25 +37,46 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
 
     Column {
-        albumMediaItems?.let {
-            LazyVerticalGrid(cells = GridCells.Fixed(2)) {
-                items(it) { item ->
-                    CollectionCell(
-                        item = item,
-                        onChangeFromAlbum = mainViewModel::onChangeFromAlbum,
-                        navigateToSongList = navigateToSongList
-                    )
+        albumMediaItems?.let { result ->
+            when(result.status) {
+                SUCCESS -> {
+                    result.data?.let { items ->
+                        Spacer(modifier = Modifier.height(20.dp))
+                        ContentText(text = stringResource(id = R.string.recommended_title))
+                        LazyVerticalGrid(
+                            cells = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(start = 7.5.dp, end = 7.5.dp, top = 20.dp, bottom = 7.5.dp),
+                        ) {
+                            items(items) { item ->
+                                CollectionCell(
+                                    item = item,
+                                    onChangeFromAlbum = mainViewModel::onChangeFromAlbum,
+                                    navigateToSongList = navigateToSongList
+                                )
+                            }
+                        }
+                    }
                 }
+                LOADING -> LoadingScreen()
+                else -> Unit
             }
         }
 
-        artistMediaItems?.let {
-            ScrollableArtistRow(
-                artistMediaItems = it,
-                scrollState = scrollState,
-                onChangeFromAlbum = mainViewModel::onChangeFromAlbum,
-                navigateToSongList = navigateToSongList
-            )
+        artistMediaItems?.let { result ->
+            when(result.status) {
+                SUCCESS -> {
+                    result.data?.let { items ->
+                        ContentText(text = stringResource(id = R.string.artists_title))
+                        ScrollableArtistRow(
+                            artistMediaItems = items,
+                            scrollState = scrollState,
+                            onChangeFromAlbum = mainViewModel::onChangeFromAlbum,
+                            navigateToSongList = navigateToSongList
+                        )
+                    }
+                }
+                else -> Unit
+            }
         }
     }
 }
@@ -65,12 +90,13 @@ fun CollectionCell(
     Box(
         modifier = Modifier
             .padding(8.dp)
+            .clip(RoundedCornerShape(10.dp))
             .clickable {
                 onChangeFromAlbum(true)
                 navigateToSongList(item.mediaId)
             }
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(horizontalAlignment = CenterHorizontally) {
             Image(
                 painter = rememberCoilPainter(
                     request = item.imageUrl,
@@ -78,7 +104,13 @@ fun CollectionCell(
                 ),
                 null
             )
-            Text(text = item.title)
+            Text(
+                text = item.title,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.Red.copy(0.6f))
+            )
         }
     }
 }
@@ -94,6 +126,7 @@ fun ScrollableArtistRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(8.dp)
             .horizontalScroll(scrollState)
     ) {
         artistMediaItems.forEach {
@@ -119,8 +152,7 @@ fun ArtistCard(
             navigateToSongList(item.mediaId)
         },
         modifier = Modifier
-            .width(160.dp)
-            .height(70.dp),
+            .padding(8.dp),
         elevation = 8.dp,
         //backgroundColor = MaterialTheme.colors.background.copy(0.7f),
         shape = RoundedCornerShape(16.dp)
@@ -134,7 +166,40 @@ fun ArtistCard(
                 contentDescription = null,
                 modifier = Modifier.width(70.dp)
             )
-            Text(text = item.title)
+            Text(
+                text = item.title,
+                maxLines = 1,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .width(70.dp)
+            )
         }
     }
+}
+
+@Composable
+fun ContentText(
+    text: String
+) {
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        modifier = Modifier.padding(start = 20.dp),
+        textAlign = TextAlign.Center
+    )
+    Divider(
+        thickness = 2.dp,
+        modifier = Modifier.padding(5.dp)
+    )
+}
+
+@Composable
+fun LoadingScreen() {
+    CircularProgressIndicator(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .padding(top = 100.dp)
+            .wrapContentSize(Alignment.Center)
+    )
 }

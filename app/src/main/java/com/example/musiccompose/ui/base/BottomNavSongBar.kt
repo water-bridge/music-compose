@@ -2,9 +2,9 @@ package com.example.musiccompose.ui.base
 
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -18,53 +18,44 @@ import androidx.compose.ui.unit.dp
 import com.example.musiccompose.extensions.isPlaying
 import com.example.musiccompose.models.MediaItemData
 import com.google.accompanist.coil.rememberCoilPainter
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
 
-@ExperimentalPagerApi
 @Composable
 fun BottomNavSongBar(
-    shouldDisplayBar: Boolean,
+    modifier: Modifier = Modifier,
     onClickIconAction: (MediaItemData, Boolean) -> Unit,
-    songList: List<MediaItemData>,
+    nowPlayingSong: MediaItemData?,
     playbackState: PlaybackStateCompat,
-    scrollState: ScrollState
+    navigateToSongDetail: (String) -> Unit
 ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-           Row(
-               modifier = Modifier
-                   .fillMaxWidth()
-                   .horizontalScroll(scrollState)
-           ) {
-               songList.forEach { item ->
-                   SongBarRow(
-                       song = item,
-                       playbackState = playbackState,
-                       onClickIconAction = onClickIconAction
-                   )
-               }
-           }
-
-
-            // Todo a nav bar may be added bellow in the future
+    nowPlayingSong?.let { song ->
+        if (song.mediaId.isNotEmpty()) {
+            Column {
+                Divider(thickness = 3.dp)
+                SongBarRow(
+                    song = song,
+                    playbackState = playbackState,
+                    onClickIconAction = onClickIconAction,
+                    navigateToSongDetail = navigateToSongDetail
+                )
+            }
         }
-
+    }
 }
 
 @Composable
 fun SongBarRow(
     song: MediaItemData,
     playbackState: PlaybackStateCompat,
-    onClickIconAction: (MediaItemData, Boolean) -> Unit
+    onClickIconAction: (MediaItemData, Boolean) -> Unit,
+    navigateToSongDetail: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(75.dp),
+            .height(75.dp)
+            .clickable {
+                navigateToSongDetail(song.mediaId)
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(

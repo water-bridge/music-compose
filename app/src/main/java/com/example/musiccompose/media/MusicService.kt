@@ -36,13 +36,14 @@ private const val SERVICE_TAG = "MusicService"
 class MusicService : MediaBrowserServiceCompat(){
 
     @Inject
-    lateinit var dataSourceFactory: DefaultDataSourceFactory
-
-    @Inject
     lateinit var exoPlayer: SimpleExoPlayer
 
     @Inject
     lateinit var firebaseMusicSource: MusicSource
+
+    @Inject
+    lateinit var dataSourceFactory: DefaultDataSourceFactory
+
     private var currentPlaylistItems: List<MediaMetadataCompat> = emptyList()
 
     private lateinit var musicNotificationManager: MusicNotificationManager
@@ -61,11 +62,6 @@ class MusicService : MediaBrowserServiceCompat(){
         BrowseTree(applicationContext, firebaseMusicSource)
     }
 
-    companion object {
-        var curSongDuration = 0L
-            private set
-    }
-
     override fun onCreate() {
         super.onCreate()
 
@@ -73,12 +69,13 @@ class MusicService : MediaBrowserServiceCompat(){
             firebaseMusicSource.load()
         }
 
-        val sessionActivityIntent = packageManager?.getLeanbackLaunchIntentForPackage(packageName)?.let {
-            PendingIntent.getActivity(this, 0, it, 0)
-        }
+        val sessionActivityPendingIntent =
+            packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
+                PendingIntent.getActivity(this, 0, sessionIntent, 0)
+            }
 
         mediaSession = MediaSessionCompat(this, SERVICE_TAG).apply {
-            setSessionActivity(sessionActivityIntent)
+            setSessionActivity(sessionActivityPendingIntent)
             isActive = true
         }
 
@@ -170,10 +167,6 @@ class MusicService : MediaBrowserServiceCompat(){
     ) {
         val resultSent = firebaseMusicSource.whenReady { successfullyInitialized ->
             if (successfullyInitialized) {
-                //val children = firebaseMusicSource.toList().toMediaItem()
-                /*val children = browseTree[parentId]?.map { item ->
-                    MediaItem(item.description, item.flag)
-                }*/
                 val children = browseTree[parentId]?.map { item ->
                     MediaItem(item.description, item.flag)
                 }

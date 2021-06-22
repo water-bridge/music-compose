@@ -19,7 +19,6 @@ import com.example.musiccompose.util.contansts.NETWORK_FAILURE
 class MusicServiceConnection(
     context: Context
 ) {
-    val rootMediaId: String get() = mediaBrowser.root
 
     private val _duration = MutableLiveData<Long>()
     val duration: LiveData<Long> = _duration
