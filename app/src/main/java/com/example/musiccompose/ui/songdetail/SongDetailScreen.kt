@@ -91,7 +91,7 @@ fun SongArtView(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .background(color = Color.White.copy(0.7f))
+                .background(color = MaterialTheme.colors.background.copy(0.7f))
         ) {
             SeekBar(
                 progress = progress,

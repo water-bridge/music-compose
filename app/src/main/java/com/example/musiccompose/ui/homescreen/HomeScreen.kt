@@ -13,8 +13,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,6 +22,7 @@ import com.example.musiccompose.models.MediaItemData
 import com.example.musiccompose.ui.MainViewModel
 import com.example.musiccompose.util.Status.*
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.imageloading.ImageLoadState
 
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
@@ -45,6 +44,7 @@ fun HomeScreen(
                         ContentText(text = stringResource(id = R.string.recommended_title))
                         LazyVerticalGrid(
                             cells = GridCells.Fixed(2),
+                            modifier = Modifier.padding(8.dp),
                             contentPadding = PaddingValues(start = 7.5.dp, end = 7.5.dp, top = 20.dp, bottom = 7.5.dp),
                         ) {
                             items(items) { item ->
@@ -81,35 +81,47 @@ fun HomeScreen(
     }
 }
 
+@ExperimentalMaterialApi
 @Composable
 fun CollectionCell(
     item: MediaItemData,
     onChangeFromAlbum: (Boolean) -> Unit,
     navigateToSongList: (String) -> Unit
 ) {
-    Box(
+    Card(
+        onClick = {
+            onChangeFromAlbum(true)
+            navigateToSongList(item.mediaId)
+        },
         modifier = Modifier
-            .padding(8.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .clickable {
-                onChangeFromAlbum(true)
-                navigateToSongList(item.mediaId)
-            }
+            .padding(8.dp),
+        elevation = 8.dp,
+        //backgroundColor = MaterialTheme.colors.background.copy(0.7f),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Column(horizontalAlignment = CenterHorizontally) {
+        Column {
+            val painter = rememberCoilPainter(
+                request = item.imageUrl,
+                fadeIn = true,
+            )
             Image(
-                painter = rememberCoilPainter(
-                    request = item.imageUrl,
-                    fadeIn = true,
-                ),
+                painter = painter,
                 null
             )
+            when (painter.loadState) {
+                is ImageLoadState.Loading -> {
+                    CircularProgressIndicator(
+                        Modifier
+                            .align(CenterHorizontally)
+                    )
+                }
+                is ImageLoadState.Error -> Unit
+            }
             Text(
                 text = item.title,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = Color.Red.copy(0.6f))
             )
         }
     }

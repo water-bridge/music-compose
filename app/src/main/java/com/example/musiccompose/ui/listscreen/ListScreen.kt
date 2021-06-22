@@ -13,7 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import com.example.musiccompose.ui.MainViewModel
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.musiccompose.models.MediaItemData
 import com.google.accompanist.coil.rememberCoilPainter
 
@@ -84,7 +86,12 @@ fun SongCard(
                 ),
                 null
             )
-            Text(text = mediaItemData.title)
+            Text(
+                text = mediaItemData.title,
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .padding(12.dp)
+            )
         }
     }
 }
