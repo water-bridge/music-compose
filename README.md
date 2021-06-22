@@ -4,9 +4,7 @@ A simple audio app using Jetpack compose
 </p>
 
 ## Video
-<p align="center">  
- 
-</p>
+- [short demo](https://youtu.be/Ud5tLkFhITY)
 
 ## References
 - [Universal Android Music Player Sample](https://github.com/android/uamp)
