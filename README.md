@@ -7,7 +7,7 @@ A simple audio app using Jetpack compose
 - [short demo](https://youtu.be/Ud5tLkFhITY)
 
 ## Todo
-- ...
+- Music Compose is still under development, and some features are not yet implemented.
 
 ## References
 - [Universal Android Music Player Sample](https://github.com/android/uamp)
