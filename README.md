@@ -3,7 +3,7 @@
 A simple audio app using Jetpack compose
 </p>
 
-## Video
+## Demo
 - [short demo](https://youtu.be/Ud5tLkFhITY)
 
 ## Todo
