@@ -1,11 +1,13 @@
 package com.example.musiccompose.di
 
 import android.content.Context
+import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.musiccompose.MusicServiceConnection
 import com.example.musiccompose.R
+import com.example.musiccompose.data.local.SongDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +25,22 @@ object AppModule {
     fun provideMusicServiceConnection(
         @ApplicationContext context: Context
     ) = MusicServiceConnection(context)
+
+    @Singleton
+    @Provides
+    fun provideDataBase(
+        @ApplicationContext context: Context
+    ) = Room.databaseBuilder(
+        context,
+        SongDatabase::class.java,
+        "songDb"
+    ).build()
+
+    @Singleton
+    @Provides
+    fun provideDao(
+        database: SongDatabase
+    ) = database.songDao()
 
     @Singleton
     @Provides

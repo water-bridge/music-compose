@@ -1,6 +1,7 @@
 package com.example.musiccompose.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -13,8 +14,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.example.musiccompose.EMPTY_PLAYBACK_STATE
-import com.example.musiccompose.ui.base.BottomNavSongBar
-import com.example.musiccompose.ui.homescreen.HomeScreen
+import com.example.musiccompose.ui.base.NavBar
+import com.example.musiccompose.ui.base.SongBar
+import com.example.musiccompose.ui.home.HomeScreen
+import com.example.musiccompose.ui.library.LibraryScreen
 import com.example.musiccompose.ui.listscreen.ListScreen
 import com.example.musiccompose.ui.listscreen.ListViewModel
 import com.example.musiccompose.ui.songdetail.SongDetailScreen
@@ -37,44 +40,60 @@ fun MusicComposeApp() {
         val coroutineScope = rememberCoroutineScope()
         val scaffoldState = rememberScaffoldState()
 
-        var barVisible by remember { mutableStateOf(true) }
+        var songBarVisible by remember { mutableStateOf(true) }
 
         Scaffold(
             scaffoldState = scaffoldState,
             bottomBar = {
-                if (barVisible) {
-                    BottomNavSongBar(
-                        onClickIconAction = mainViewModel::playOrPause,
-                        nowPlayingSong = nowPlayingSong,
-                        playbackState = playbackState,
-                    ) {
-                        navController.navigate("${MainDestinations.SongDetail.route}/$it")
+                Column {
+                    if (songBarVisible) {
+                        SongBar(
+                            onClickIconAction = mainViewModel::playOrPause,
+                            nowPlayingSong = nowPlayingSong,
+                            playbackState = playbackState,
+                        ) {
+                            navController.navigate("${NavigationItem.SongDetail.route}/$it")
+                        }
+                        NavBar(
+                            navController = navController,
+                            items = listOf(
+                                NavigationItem.Home,
+                                NavigationItem.Library
+                            )
+                        )
                     }
+
                 }
             }
         ) {
             NavHost(
                 navController = navController,
-                startDestination = MainDestinations.Home.route
+                startDestination = NavigationItem.Home.route
             ) {
-                composable(MainDestinations.Home.route) {
-                    barVisible = true
+                composable(NavigationItem.Home.route) {
+                    songBarVisible = true
                     HomeScreen(
                         mainViewModel = mainViewModel,
                     ) {
-                        navController.navigate("${MainDestinations.SongList.route}/$it")
+                        navController.navigate("${NavigationItem.SongList.route}/$it")
                     }
                 }
+
+                composable(NavigationItem.Library.route) {
+                    songBarVisible = true
+                    LibraryScreen()
+                }
+
                 composable(
-                    MainDestinations.SongList.routeWithArgument,
+                    NavigationItem.SongList.routeWithArgument,
                     arguments = listOf(
-                        navArgument(MainDestinations.SongList.mediaId) {
+                        navArgument(NavigationItem.SongList.mediaId) {
                             type = NavType.StringType
                         }
                     )
                 ) { backStackEntry ->
                     val mediaId = backStackEntry.arguments?.getString(
-                        MainDestinations.SongList.mediaId
+                        NavigationItem.SongList.mediaId
                     ) ?: return@composable
                     // scoped to the songList screen
                     val listViewModel = hiltViewModel<ListViewModel>()
@@ -82,7 +101,7 @@ fun MusicComposeApp() {
                     coroutineScope.launch {
                         listViewModel.subscribe(mediaId)
                     }
-                    barVisible = true
+                    songBarVisible = true
                     ListScreen(
                         mainViewModel = mainViewModel,
                         listViewModel = listViewModel
@@ -90,15 +109,15 @@ fun MusicComposeApp() {
                 }
 
                 composable(
-                    MainDestinations.SongDetail.routeWithArgument,
+                    NavigationItem.SongDetail.routeWithArgument,
                     arguments = listOf(
-                        navArgument(MainDestinations.SongDetail.songId) {
+                        navArgument(NavigationItem.SongDetail.songId) {
                             type = NavType.StringType
                         }
                     )
                 ) {
                     val songDetailViewModel = hiltViewModel<SongDetailViewModel>()
-                    barVisible = false
+                    songBarVisible = false
                     SongDetailScreen(
                         mainViewModel = mainViewModel,
                         songDetailViewModel = songDetailViewModel
@@ -110,15 +129,3 @@ fun MusicComposeApp() {
 }
 
 
-sealed class MainDestinations(val route: String) {
-    object Home : MainDestinations("home")
-    object SongList : MainDestinations("songList") {
-        const val routeWithArgument: String = "songList/{mediaId}"
-        const val mediaId: String = "mediaId"
-    }
-
-    object SongDetail : MainDestinations("songDetail") {
-        const val routeWithArgument: String = "songDetail/{songId}"
-        const val songId: String = "songId"
-    }
-}

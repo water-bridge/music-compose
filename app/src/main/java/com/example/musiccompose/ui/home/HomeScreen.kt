@@ -1,4 +1,4 @@
-package com.example.musiccompose.ui.homescreen
+package com.example.musiccompose.ui.home
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

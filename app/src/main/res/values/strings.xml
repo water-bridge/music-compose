@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">Music Compose</string>
+    <string name="home">Home</string>
+    <string name="library">Library</string>
+
     <string name="recommended_title">Recommended</string>
     <string name="albums_title">Albums</string>
     <string name="artists_title">Artists</string>
+
     <string name="notification_channel_name">Music Channel</string>
     <string name="notification_channel_description">the music channel</string>
 </resources>
