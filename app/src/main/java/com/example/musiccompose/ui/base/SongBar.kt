@@ -60,18 +60,20 @@ fun SongBarRow(
             null,
             //modifier = Modifier.weight(0.2f, true)
         )
+
         Text(
             text = song.title,
             modifier = Modifier
-                .weight(0.7f, true)
+                .weight(0.6f, true)
                 .padding(horizontal = 8.dp)
         )
+
         if (playbackState.isPlaying) {
             IconButton(
                 onClick = {
                     onClickIconAction(song, true)
                 },
-                modifier = Modifier.weight(0.3f, true)
+                modifier = Modifier.weight(0.2f, true)
             ) {
                 Icon(imageVector = Icons.Filled.Pause, contentDescription = null)
             }
@@ -80,7 +82,7 @@ fun SongBarRow(
                 onClick = {
                     onClickIconAction(song, false)
                 },
-                modifier = Modifier.weight(0.3f, true)
+                modifier = Modifier.weight(0.2f, true)
             ) {
                 Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null)
             }

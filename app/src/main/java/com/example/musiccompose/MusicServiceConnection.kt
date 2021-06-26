@@ -12,8 +12,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.musiccompose.extensions.duration
 import com.example.musiccompose.media.MusicService
-import com.example.musiccompose.util.Event
-import com.example.musiccompose.util.Resource
 import com.example.musiccompose.util.contansts.NETWORK_FAILURE
 
 class MusicServiceConnection(

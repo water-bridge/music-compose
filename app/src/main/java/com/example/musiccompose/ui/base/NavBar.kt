@@ -1,12 +1,10 @@
 package com.example.musiccompose.ui.base
 
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.musiccompose.ui.NavigationItem
@@ -16,7 +14,10 @@ fun NavBar(
     navController: NavController,
     items: List<NavigationItem>
 ) {
-    BottomNavigation {
+    BottomNavigation(
+        backgroundColor = MaterialTheme.colors.background,
+        elevation = 8.dp
+    ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination?.route
         items.forEach { item ->

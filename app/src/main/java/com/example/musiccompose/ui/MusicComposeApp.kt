@@ -81,7 +81,9 @@ fun MusicComposeApp() {
 
                 composable(NavigationItem.Library.route) {
                     songBarVisible = true
-                    LibraryScreen()
+                    LibraryScreen(
+                        mainViewModel = mainViewModel
+                    )
                 }
 
                 composable(

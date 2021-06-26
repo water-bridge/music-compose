@@ -13,29 +13,36 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import com.example.musiccompose.ui.MainViewModel
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.musiccompose.R
 import com.example.musiccompose.models.MediaItemData
+import com.example.musiccompose.ui.base.ContentText
+import com.example.musiccompose.ui.base.SongCard
 import com.google.accompanist.coil.rememberCoilPainter
 
 @ExperimentalMaterialApi
 @Composable
 fun ListScreen(
     mainViewModel: MainViewModel,
-    listViewModel: ListViewModel,
+    listViewModel: ListViewModel
 ) {
     val listState = rememberLazyListState()
     val songList by listViewModel.songList.observeAsState()
+    val librarySongList by mainViewModel.librarySongList.observeAsState(emptyList())
 
     songList?.let { itemList ->
         Column {
             Spacer(modifier = Modifier.height(20.dp))
-            Divider(thickness = 5.dp)
+            ContentText(stringResource(id = R.string.song_list_title))
             SongList(
-                listState,
-                itemList,
-                mainViewModel::playOrPause,
+                listState = listState,
+                songList = itemList,
+                librarySongList = librarySongList,
+                playOrPause = mainViewModel::playOrPause,
+                insertSong = mainViewModel::insertSong,
+                deleteSong = mainViewModel::deleteSong
             )
         }
     }
@@ -47,51 +54,24 @@ fun ListScreen(
 @Composable
 fun SongList(
     listState: LazyListState,
-    mediaItemDataList: List<MediaItemData>,
+    songList: List<MediaItemData>,
+    librarySongList: List<MediaItemData>,
     playOrPause: (MediaItemData, Boolean) -> Unit,
+    insertSong: (MediaItemData) -> Unit,
+    deleteSong: (MediaItemData) -> Unit
 ) {
     LazyColumn(state = listState) {
-        items(mediaItemDataList) { item ->
+        items(songList) { item ->
             SongCard(
-                item,
-                playOrPause,
+                mediaItemData = item,
+                playOrPause = playOrPause,
+                isInLibrary = librarySongList.contains(item),
+                insertSong = insertSong,
+                deleteSong = deleteSong
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
-@ExperimentalMaterialApi
-@Composable
-fun SongCard(
-    mediaItemData: MediaItemData,
-    playOrPause: (MediaItemData, Boolean) -> Unit,
-) {
-    Card(
-        onClick = {
-            playOrPause(mediaItemData, false)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(70.dp),
-        elevation = 8.dp,
-        //backgroundColor = MaterialTheme.colors.background.copy(0.7f),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row {
-            Image(
-                painter = rememberCoilPainter(
-                    request = mediaItemData.imageUrl,
-                    fadeIn = true,
-                ),
-                null
-            )
-            Text(
-                text = mediaItemData.title,
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(12.dp)
-            )
-        }
-    }
-}
+

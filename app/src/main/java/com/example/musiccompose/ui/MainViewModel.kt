@@ -1,24 +1,24 @@
 package com.example.musiccompose.ui
 
 import androidx.core.os.bundleOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.example.musiccompose.MusicServiceConnection
 import com.example.musiccompose.SubscriptionCallback
 import com.example.musiccompose.extensions.*
 import com.example.musiccompose.models.MediaItemData
+import com.example.musiccompose.repository.SongRepository
 import com.example.musiccompose.util.Resource
 import com.example.musiccompose.util.contansts.MEDIA_ALBUMS_ROOT
 import com.example.musiccompose.util.contansts.MEDIA_ARTISTS_ROOT
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val musicServiceConnection: MusicServiceConnection
+    private val musicServiceConnection: MusicServiceConnection,
+    private val songRepository: SongRepository
 ) : ViewModel() {
 
     private val _albumMediaItems = MutableLiveData<Resource<List<MediaItemData>>>()
@@ -26,6 +26,9 @@ class MainViewModel @Inject constructor(
 
     private val _artistMediaItems = MutableLiveData<Resource<List<MediaItemData>>>()
     val artistMediaItems: LiveData<Resource<List<MediaItemData>>> = _artistMediaItems
+
+    val librarySongList: LiveData<List<MediaItemData>> =
+        songRepository.getAllSong().asLiveData()
 
     val nowPlayingSong: LiveData<MediaItemData> =
         Transformations.map(musicServiceConnection.nowPlaying) { nowPlaying ->
@@ -61,7 +64,7 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        // Todo the recommendation part is still not implemented yet
+        // Todo the recent and recommendation part is still not implemented yet
         _albumMediaItems.postValue(Resource.loading(null))
         _artistMediaItems.postValue((Resource.loading(null)))
         musicServiceConnection.subscribe(MEDIA_ALBUMS_ROOT, albumsSubscriptionCallback)
@@ -87,6 +90,18 @@ class MainViewModel @Inject constructor(
                     mediaItem.mediaId,
                     bundleOf("FROM_ALBUM" to fromAlbum)
                 )
+        }
+    }
+
+    fun insertSong(song: MediaItemData) {
+        viewModelScope.launch {
+            songRepository.insertSong(song)
+        }
+    }
+
+    fun deleteSong(song: MediaItemData) {
+        viewModelScope.launch {
+            songRepository.deleteSong(song)
         }
     }
 

@@ -6,6 +6,8 @@
     <string name="recommended_title">Recommended</string>
     <string name="albums_title">Albums</string>
     <string name="artists_title">Artists</string>
+    <string name="library_title">Library</string>
+    <string name="song_list_title">Song List</string>
 
     <string name="notification_channel_name">Music Channel</string>
     <string name="notification_channel_description">the music channel</string>

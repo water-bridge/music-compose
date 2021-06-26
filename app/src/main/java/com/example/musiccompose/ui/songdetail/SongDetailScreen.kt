@@ -43,10 +43,10 @@ fun SongDetailScreen(
                 progress = progress,
                 modifier = Modifier
                     .fillMaxSize(),
-                mainViewModel::nextSong,
-                mainViewModel::previousSong,
-                mainViewModel::playOrPause,
-                mainViewModel::seekTo
+                nextSong = mainViewModel::nextSong,
+                previousSong = mainViewModel::previousSong,
+                playOrPause = mainViewModel::playOrPause,
+                seekTo = mainViewModel::seekTo
             )
         }
     }
@@ -98,9 +98,9 @@ fun SongArtView(
                 seekTo = seekTo
             )
             PlaybackBar(
-                playbackState,
-                nextSong,
-                previousSong,
+                playbackState = playbackState,
+                nextSong = nextSong,
+                previousSong = previousSong,
             ) {
                 playOrPause(curPlayingSong, it)
             }

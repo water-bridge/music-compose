@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.example.musiccompose.R
 import com.example.musiccompose.models.MediaItemData
 import com.example.musiccompose.ui.MainViewModel
+import com.example.musiccompose.ui.base.ContentText
 import com.example.musiccompose.util.Status.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.imageloading.ImageLoadState
@@ -187,22 +188,6 @@ fun ArtistCard(
             )
         }
     }
-}
-
-@Composable
-fun ContentText(
-    text: String
-) {
-    Text(
-        text = text,
-        fontSize = 20.sp,
-        modifier = Modifier.padding(start = 20.dp),
-        textAlign = TextAlign.Center
-    )
-    Divider(
-        thickness = 2.dp,
-        modifier = Modifier.padding(5.dp)
-    )
 }
 
 @Composable
