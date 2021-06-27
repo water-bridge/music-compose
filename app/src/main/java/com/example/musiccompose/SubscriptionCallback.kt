@@ -13,13 +13,13 @@ class SubscriptionCallback(
         super.onChildrenLoaded(parentId, children)
         val items = children.map {
             MediaItemData(
-                it.mediaId!!,
-                it.description.title.toString(),
-                it.description.subtitle.toString(),
-                it.description.mediaUri.toString(),
-                it.description.iconUri.toString(),
-                -99,
-                it.isBrowsable // may be used in future
+                mediaId = it.mediaId!!,
+                title = it.description.title.toString(),
+                subtitle = it.description.subtitle.toString(),
+                songUrl = it.description.mediaUri.toString(),
+                imageUrl = it.description.iconUri.toString(),
+                duration = -99,
+                browsable = it.isBrowsable // may be used in future
             )
         }
         onCallback(items)

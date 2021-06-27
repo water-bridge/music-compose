@@ -33,13 +33,13 @@ class MainViewModel @Inject constructor(
     val nowPlayingSong: LiveData<MediaItemData> =
         Transformations.map(musicServiceConnection.nowPlaying) { nowPlaying ->
             MediaItemData(
-                nowPlaying?.description?.mediaId ?: "",
-                nowPlaying?.description?.title.toString(),
-                nowPlaying?.description?.subtitle.toString(),
-                nowPlaying?.description?.mediaUri.toString(),
-                nowPlaying?.description?.iconUri.toString(),
-                nowPlaying.duration,
-                false
+                mediaId = nowPlaying?.description?.mediaId ?: "",
+                title = nowPlaying?.description?.title.toString(),
+                subtitle = nowPlaying?.description?.subtitle.toString(),
+                songUrl = nowPlaying?.description?.mediaUri.toString(),
+                imageUrl = nowPlaying?.description?.iconUri.toString(),
+                duration = nowPlaying.duration,
+                browsable = false
             )
         }
 
