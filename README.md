@@ -4,7 +4,7 @@ A simple audio app using Jetpack compose
 </p>
 
 ## Demo
-- [short demo](https://youtu.be/EIZsh9VhqYA)
+- [video](https://youtu.be/EIZsh9VhqYA)
 
 ## Todo
 - Music Compose is still under development, and a lot of features are not yet implemented.
